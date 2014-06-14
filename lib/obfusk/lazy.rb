@@ -14,9 +14,10 @@ module Obfusk
     return x if x.respond_to?(:__obfusk_lazy__?) && x.__obfusk_lazy__?
     f = b ? b : -> { x }; v = nil; e = false
     g = -> () { unless e then v = f[]; e = true end; v }
-    g.define_singleton_method(:__obfusk_lazy__?) { true }; g
+    g.define_singleton_method(:__obfusk_lazy__?) { true }
+    g.define_singleton_method(:_) { g[] }; g
   end
-  def self.unlazy(x)
+  def self.eager(x)
     x.respond_to?(:__obfusk_lazy__?) && x.__obfusk_lazy__? ? x[] : x
   end
 end

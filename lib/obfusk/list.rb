@@ -29,23 +29,17 @@ module Obfusk
                                      ::Obfusk.lazy(data[:tail]) }
     end
 
-    class Cons
-      # strict tail
-      alias :_tail :tail
-
-      # lazy tail
-      def tail
-        _tail[]
-      end
-    end
-
     def each(&b)
       return enum_for :each unless b
-      xs = self; while xs != Nil() do b[xs.head]; xs = xs.tail end
+      xs = self; while xs != Nil() do b[xs.head]; xs = xs.tail._ end
     end
 
     def to_a
       each.to_a
+    end
+
+    def _
+      self
     end
 
     # --
@@ -53,14 +47,14 @@ module Obfusk
     def filter(p = nil, &b)
       g = f || b
       match Nil:  -> (_) { Nil() },
-            Cons: -> (x) { p[x] ? Cons(x.head) { x.tail.filter p  }
-                                :                x.tail.filter(p) }
+            Cons: -> (x) { p[x] ? Cons(x.head) { x.tail._.filter p  }
+                                :                x.tail._.filter(p) }
     end
 
     def map(f = nil, &b)
       g = f || b
       match Nil:  -> (_) { Nil() },
-            Cons: -> (x) { Cons(g[x.head]) { x.tail.map g } }
+            Cons: -> (x) { Cons(g[x.head]) { x.tail._.map g } }
     end
 
     # --
@@ -83,8 +77,8 @@ module Obfusk
     # --
 
     def append(ys)
-      match Nil:  -> (_) { ys },
-            Cons: -> (x) { Cons(x.head) { x.tail.append ys } }
+      match Nil:  -> (_) { ys._ },
+            Cons: -> (x) { Cons(x.head) { x.tail._.append ys._ } }
     end
 
     # def reverse
@@ -96,7 +90,7 @@ module Obfusk
     def foldr(z, f = nil, &b)
       g = f || b
       match Nil:  -> (_) { z },
-            Cons: -> (x) { g[x.head, ::Obfusk.lazy { x.tail.foldr(z, g) }] }
+            Cons: -> (x) { g[x.head, ::Obfusk.lazy { x.tail._.foldr(z, g) }] }
     end
 
     # def and
@@ -113,6 +107,14 @@ module Obfusk
     # def product
     # def maximum
     # def minimum
+
+    # --
+
+    # def zipWith(ys, f = nil, &b)
+    #   g = f || b
+    #   self == Nil() || ys._ == Nil() ? Nil() :
+    #     Cons(g[head, ys._.head]) { puts "!WTF" } # ; tail._.zipWith(ys._.tail, g) }
+    # end
 
     # --
 
@@ -142,8 +144,13 @@ module Obfusk
     xs.empty? ? Nil() : Cons(xs.first) { List(*xs.drop(1)) }
   end
 
-  def self.cons(*xs, ys)
-    xs.reverse.each { |x| ys = Cons(x, ys) }; ys
+  def self.cons(*xs, &b)
+    if xs.empty?
+      b[]
+    else
+      *ys, x = xs; zs = Cons(x, &b)
+      ys.reverse.each { |y| zs = Cons(y, zs) }; zs
+    end
   end
 end
 
