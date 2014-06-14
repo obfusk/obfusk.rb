@@ -17,6 +17,10 @@ module Obfusk
       base.extend ClassMethods
     end
 
+    def initialize
+      raise NoMethodError, 'use a contructor!'  # TODO
+    end
+
     module ClassMethods
       def constructor(name, *keys, &b)
         self_ = self
