@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.summary     = 'functional programming library for ruby'
 
   s.description = <<-END.gsub(/^ {4}/, '')
-    ...
+    functional programming library for ruby
   END
 
   s.version     = Obfusk::VERSION
