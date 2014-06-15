@@ -9,6 +9,8 @@
 #
 # --                                                            ; }}}1
 
+require 'obfusk/lazy'
+
 module Obfusk
   module Monad
     def self.included(base)
@@ -21,6 +23,11 @@ module Obfusk
       # implement me!
       def mreturn(x)
         raise NotImplementedError
+      end
+
+      # alias for mreturn
+      def return(x)
+        mreturn x
       end
 
       # sequentially compose two actions; passing any value produced
@@ -52,11 +59,6 @@ module Obfusk
         bind_pass(m) { |_| k }
       end
 
-      # TODO
-      # def fail
-      #   raise NotImplementedError
-      # end
-
       # map monad (i.e. functor)
       def fmap(m, f = nil, &b)
         g = f || b; bind(m) { |k| mreturn g[k] }
@@ -69,7 +71,7 @@ module Obfusk
 
       # concatenate a sequence of binds
       def pipeline(m, *fs)
-        fs.each { |f| m = bind(m, &f) }; m
+        fs.empty? ? m : m.bind { |k| pipeline fs.first[k], *fs.drop(1) }
       end
 
       # evaluate each action in the sequence from left to right, and
@@ -87,23 +89,10 @@ module Obfusk
       end
     end
 
-    def bind(k = nil, &b)
-      self.class.bind self, k, &b
-    end
-    def fmap(f = nil, &b)
-      self.class.fmap self, f, &b
-    end
-    def join
-      self.class.join self
-    end
-    def pipeline(*fs)
-      self.class.pipeline self, *fs
-    end
-    def sequence(*ms)
-      self.class.sequence(self, *ms)
-    end
-    def sequence_(*ms)
-      self.class.sequence_(self, *ms)
+    %w{ bind fmap join pipeline sequence sequence_ }.map(&:to_sym).each do |m|
+      define_method(m) do |*a,&b|
+        self.class.public_send m, self, *a, &b
+      end
     end
   end
 
@@ -119,13 +108,17 @@ module Obfusk
       end
 
       # associative operation
-      def plus(m, k)
+      def plus(m, k = nil, &b)
+        lazy_plus m, ::Obfusk.lazy(k, &b)
+      end
+
+      def lazy_plus(m, k)
         raise NotImplementedError
       end
     end
 
-    def plus(k)
-      self.class.mplus self, k
+    def plus(k = nil, &b)
+      self.class.plus self, k, &b
     end
   end
 end

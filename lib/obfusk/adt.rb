@@ -45,7 +45,6 @@ module Obfusk
       # @param [Symbol]   name  the name of the constructor
       # @param [<Symbol>] keys  the keys of the constructor
       def constructor(name, *keys, &b)
-        self_ = self
         keys_ = keys.map(&:to_sym)
         name_ = name.to_sym
         ctor  = ::Obfusk::ADT_Meta__[:mutex].synchronize do
@@ -57,23 +56,22 @@ module Obfusk
           end
         end
         ctor.class_eval do
-          attr_accessor :cls, :ctor, :ctor_name, :ctor_keys
+          attr_accessor :ctor, :ctor_name, :ctor_keys
           keys_.each { |k| define_method(k) { @data[k] } }
-          define_method(:initialize) do |guard, cls, ctor, *values, &f|
+          define_method(:initialize) do |guard, ctor, *values, &f|
             raise ArgumentError, 'for internal use only!' \
               unless guard == :for_internal_use_only
             if !b && (k = keys_.length) != (v = values.length)
               raise ArgumentError, "wrong number of arguments (#{v} for #{k})"
             end
-            data        = Hash[keys_.zip values]
-            @cls        = cls                   ; @ctor       = ctor
-            @ctor_name  = name_                 ; @ctor_keys  = keys_
-            @data       = b ? b[self, data, values, f] : data
+            data  = Hash[keys_.zip values]
+            @ctor = ctor ; @ctor_name = name_ ; @ctor_keys = keys_
+            @data = b ? b[self, data, values, f] : data
           end
         end
         class_eval do
           const_set name_, ctor
-          f = -> v, b { ctor.new :for_internal_use_only, self_, ctor, *v, &b }
+          f = -> v, b { ctor.new :for_internal_use_only, ctor, *v, &b }
           if !b && keys.empty?
             singleton = f[[],nil]
             define_singleton_method(name_) { singleton }
@@ -107,9 +105,10 @@ module Obfusk
 
       # pattern matching
       def match(x, opts)
-        unless x.cls == self
-          raise ArgumentError, "types do not match (#{x.cls} for #{self})"
-        end
+        raise ArgumentError, 'not an ADT' unless x.is_a?(::Obfusk::ADT)
+        raise ArgumentError,
+          "types do not match (#{x.class.superclass} for #{self})" \
+            unless x.class.superclass == self
         x.match opts
       end
     end
@@ -121,7 +120,9 @@ module Obfusk
 
     # equal?
     def ==(rhs)
-      cls == rhs.cls && ctor == rhs.ctor && _eq_data(rhs)
+      rhs.is_a?(::Obfusk::ADT) &&
+        self.class.superclass == rhs.class.superclass &&
+        ctor == rhs.ctor && _eq_data(rhs)
     end
 
     # equal and of the same type?
@@ -131,8 +132,9 @@ module Obfusk
 
     # ordering
     def <=>(rhs)
-      return nil unless cls == rhs.cls
-      k = cls.constructors.keys
+      return nil unless rhs.is_a?(::Obfusk::ADT) &&
+                        self.class.superclass == rhs.class.superclass
+      k = self.class.superclass.constructors.keys
       ctor != rhs.ctor ? k.index(ctor_name) <=> k.index(rhs.ctor_name) :
         _compare_data(rhs)
     end
@@ -147,7 +149,8 @@ module Obfusk
 
     # pattern matching
     def match(opts)
-      unless (ck = cls.constructors.keys.sort) == (ok = opts.keys.sort)
+      unless (ck = self.class.superclass.constructors.keys.sort) ==
+             (ok = opts.keys.sort)
         raise ArgumentError,
           "constructors do not match (#{ok} for #{ck})"
       end
@@ -156,7 +159,7 @@ module Obfusk
 
     # to string
     def to_s
-      "#<#{cls.name || '<ADT>'}.#{ctor_name}: #{@data}>"
+      "#<#{self.class.superclass.name || '#ADT'}.#{ctor_name}: #{@data}>"
     end
 
     # to string

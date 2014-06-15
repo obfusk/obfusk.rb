@@ -28,12 +28,18 @@ module Obfusk
       m.match Nothing:  -> (_) { Nothing()  },
               Just:     -> (x) { b[x.value] }
     end
+    def self.zero
+      Nothing()
+    end
+    def self.lazy_plus(m, k)
+      m.match Nothing:  -> (_) { k._ },
+              Just:     -> (_) { m   }
+    end
   end
 
   class Either
     include ADT
     include Monad
-    include MonadPlus
 
     constructor :Left , :value
     constructor :Right, :value

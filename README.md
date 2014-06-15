@@ -2,10 +2,10 @@
 
     File        : README.md
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2014-06-15
+    Date        : 2014-06-16
 
     Copyright   : Copyright (C) 2014  Felix C. Stegerman
-    Version     : v0.0.1
+    Version     : v0.1.0
 
 []: }}}1
 
@@ -107,8 +107,6 @@ $ rake docs
 
 ## TODO
 
-  * specs (& docs)
-  * monad fail
   * more lists operations
   * more stuff from obfusk.coffee
   * ...

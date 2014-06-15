@@ -83,7 +83,7 @@ describe 'obfusk/adt' do
       expect(foo.Bar(11,22)).to be > foo.Bar(11,21)
     end
     it 'has proper to_s' do
-      expect(foo.Bar(11,22).to_s).to eq('#<<ADT>.Bar: {:x=>11, :y=>22}>')
+      expect(foo.Bar(11,22).to_s).to eq('#<#ADT.Bar: {:x=>11, :y=>22}>')
     end
 
     context 'inherits properly and' do
