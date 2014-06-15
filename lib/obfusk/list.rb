@@ -58,7 +58,7 @@ module Obfusk
     end
 
     def to_s
-      n = self.class.name
+      *xs, x = self.class.name.split '::'; n = xs*'::' + '.' + x
       self == Nil() ? "<##{n}>" : "<##{n}(#{head},...)>"
     end
 
@@ -111,6 +111,7 @@ module Obfusk
     def null
       match Nil: -> (_) { true }, Cons: -> (_) { false }
     end
+    alias :null?  :null
     alias :empty? :null
 
     # --
