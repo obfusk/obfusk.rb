@@ -78,7 +78,7 @@ end
 f = -> x { '...' }
 g = -> y { '...' }
 
-Foo.pipeline Foo.new('...'), f, g
+Foo.new('...').pipeline f, g
 ```
 
 ```ruby
