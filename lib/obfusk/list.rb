@@ -31,13 +31,26 @@ module Obfusk
     end
 
     class Cons
+      # lazy tail
       alias :lazy_tail :tail
 
-      # lazy tail
+      # eager tail
       def tail
         lazy_tail._
       end
     end
+
+    def _eq_data(rhs)
+       match  Nil:  -> (_) { true },
+              Cons: -> (_) { [head,tail] == [rhs.head,rhs.tail] }
+    end
+
+    def _compare_data(rhs)
+       match  Nil:  -> (_) { 0 },
+              Cons: -> (_) { [head,tail] <=> [rhs.head,rhs.tail] }
+    end
+
+    # --
 
     def each(&b)
       return enum_for :each unless b
@@ -69,8 +82,8 @@ module Obfusk
     def filter(p = nil, &b)
       g = p || b
       match Nil:  -> (_)  { Nil() },
-            Cons: -> (xs) { g[xs] ? Cons(xs.head) { xs.tail.filter(g) }
-                                :                   xs.tail.filter(g) }
+            Cons: -> (xs) { g[xs.head] ? Cons(xs.head) { xs.tail.filter(g) }
+                                       :                 xs.tail.filter(g) }
     end
 
     # the list obtained by applying a function (or block) to each element

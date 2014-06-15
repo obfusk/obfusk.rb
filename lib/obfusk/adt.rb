@@ -98,7 +98,7 @@ module Obfusk
 
     # equal?
     def ==(rhs)
-      cls == rhs.cls && ctor == rhs.ctor && _data == rhs._data
+      cls == rhs.cls && ctor == rhs.ctor && _eq_data(rhs)
     end
 
     # equal and of the same type?
@@ -108,7 +108,18 @@ module Obfusk
 
     # ordering
     def <=>(rhs)
-      cls == rhs.cls && ctor == rhs.ctor ? _data <=> rhs._data : nil
+      return nil unless cls == rhs.cls
+      k = cls.constructors.keys
+      ctor != rhs.ctor ? k.index(ctor_name) <=> k.index(rhs.ctor_name) :
+        _compare_data(rhs)
+    end
+
+    def _eq_data(rhs)
+      _data == rhs._data
+    end
+
+    def _compare_data(rhs)
+      _data.values_at(*ctor_keys) <=> rhs._data.values_at(*ctor_keys)
     end
 
     # pattern matching
@@ -122,8 +133,7 @@ module Obfusk
 
     # to string
     def to_s
-      ctor_name = ctor.name.gsub(/^.*::/,'')
-      "#<#{cls.name}.#{ctor_name}: #{@data}>"
+      "#<#{cls.name || '<ADT>'}.#{ctor_name}: #{@data}>"
     end
 
     # to string
