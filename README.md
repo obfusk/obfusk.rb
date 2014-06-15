@@ -67,7 +67,7 @@ require 'obfusk/monad'
 
 class Foo
   include Obfusk::Monad
-  def self.return(x)
+  def self.mreturn(x)
     # ...
   end
   def self.bind_pass(m, &b)
