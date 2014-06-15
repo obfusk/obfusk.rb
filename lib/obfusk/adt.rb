@@ -9,7 +9,11 @@
 #
 # --                                                            ; }}}1
 
+require 'thread'
+
 module Obfusk
+
+  ADT_Meta__ = { inheriting: [false], mutex: Mutex.new }
 
   # Algebraic Data Type
   module ADT
@@ -26,6 +30,17 @@ module Obfusk
     end
 
     module ClassMethods
+      # duplicate constructors for subclasses
+      def inherited(subclass)
+        return if ::Obfusk::ADT_Meta__[:inheriting].last
+        ctors = constructors
+        subclass.class_eval do
+          ctors.each_pair do |k,v|
+            constructor v[:ctor_name], *v[:ctor_keys], &v[:ctor_block]
+          end
+        end
+      end
+
       # create a constructor
       # @param [Symbol]   name  the name of the constructor
       # @param [<Symbol>] keys  the keys of the constructor
@@ -33,7 +48,14 @@ module Obfusk
         self_ = self
         keys_ = keys.map(&:to_sym)
         name_ = name.to_sym
-        ctor  = Class.new self
+        ctor  = ::Obfusk::ADT_Meta__[:mutex].synchronize do
+          begin
+            ::Obfusk::ADT_Meta__[:inheriting] << true
+            Class.new self
+          ensure
+            ::Obfusk::ADT_Meta__[:inheriting].pop
+          end
+        end
         ctor.class_eval do
           attr_accessor :cls, :ctor, :ctor_name, :ctor_keys
           keys_.each { |k| define_method(k) { @data[k] } }
@@ -43,16 +65,13 @@ module Obfusk
             if !b && (k = keys_.length) != (v = values.length)
               raise ArgumentError, "wrong number of arguments (#{v} for #{k})"
             end
-            data  = Hash[keys_.zip values]
-            @cls  = cls; @ctor = ctor; @ctor_name = name_; @ctor_keys = keys_
-            @data = b ? b[self, data, values, f] : data
+            data        = Hash[keys_.zip values]
+            @cls        = cls                   ; @ctor       = ctor
+            @ctor_name  = name_                 ; @ctor_keys  = keys_
+            @data       = b ? b[self, data, values, f] : data
           end
         end
         class_eval do
-          if !@constructors
-            @constructors = superclass.ancestors.include?(::Obfusk::ADT) ?
-                              superclass.constructors.dup : {}
-          end
           const_set name_, ctor
           f = -> v, b { ctor.new :for_internal_use_only, self_, ctor, *v, &b }
           if !b && keys.empty?
@@ -63,14 +82,18 @@ module Obfusk
             define_singleton_method(name_) { |*values,&b| f[values,b] }
             define_method(name_)           { |*values,&b| f[values,b] }
           end
-          @constructors[name_] = { ctor: ctor, method: method(name_) }
+          constructors[name_] = {
+            ctor: ctor, method: method(name_),
+            ctor_name: name_, ctor_keys: keys_, ctor_block: b
+          }
         end
+        name_
       end
       private :constructor
 
       # the constructors
       def constructors
-        @constructors
+        @constructors ||= {}
       end
 
       # import the constructors into another namespace

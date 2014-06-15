@@ -13,6 +13,8 @@ require 'obfusk/adt'
 
 describe 'obfusk/adt' do
 
+  ctors = -> c { c.constructors.values.map { |x| x[:ctor] } }
+
   foo = Class.new do
     include Obfusk::ADT
     constructor :Foo
@@ -20,6 +22,14 @@ describe 'obfusk/adt' do
     constructor(:Baz, :z) do |cls, data, values, f|
       { z: data[:z] || 42 }
     end
+  end
+
+  bar = Class.new(foo) do
+    constructor :Qux, :ok?
+  end
+
+  baz = Class.new(bar) do
+    constructor :Quux
   end
 
   context 'ADT foo' do
@@ -53,6 +63,12 @@ describe 'obfusk/adt' do
       expect(f[foo.Bar(99,1)]).to eq(100)
       expect(f[foo.Baz(77)  ]).to eq(-77)
     end
+    it 'fails matching with wrong keys' do
+      expect{ foo.Foo.match(Foo: -> (_) { 99 }) }.to \
+        raise_exception(ArgumentError, /constructors do not match/)
+      expect{ foo.Foo.match(Foo: nil, Bar: nil, Baz: nil, Qux: nil) }.to \
+        raise_exception(ArgumentError, /constructors do not match/)
+    end
     it 'has proper equality' do
       expect(foo.Foo).to          eq(foo.Foo)
       expect(foo.Foo).to_not      eq(foo.Bar(1,2))
@@ -68,6 +84,44 @@ describe 'obfusk/adt' do
     end
     it 'has proper to_s' do
       expect(foo.Bar(11,22).to_s).to eq('#<<ADT>.Bar: {:x=>11, :y=>22}>')
+    end
+
+    context 'inherits properly and' do
+      it 'has its own constructors' do
+        expect(ctors[foo] & ctors[bar]).to eq([])
+        expect(ctors[foo] & ctors[baz]).to eq([])
+        expect(ctors[bar] & ctors[baz]).to eq([])
+      end
+      it 'has all expected constructors' do
+        expect(foo.constructors.keys).to eq([:Foo,:Bar,:Baz])
+        expect(bar.constructors.keys).to eq([:Foo,:Bar,:Baz,:Qux])
+        expect(baz.constructors.keys).to eq([:Foo,:Bar,:Baz,:Qux,:Quux])
+      end
+      it 'matches properly' do
+        f = -> x { x.match Foo:  -> (_) { 1  },
+                           Bar:  -> (_) { 2  },
+                           Baz:  -> (_) { 3  } }
+        g = -> x { x.match Foo:  -> (_) { 4  },
+                           Bar:  -> (_) { 5  },
+                           Baz:  -> (_) { 6  },
+                           Qux:  -> (_) { 7  } }
+        h = -> x { x.match Foo:  -> (_) { 8  },
+                           Bar:  -> (_) { 9  },
+                           Baz:  -> (_) { 10 },
+                           Qux:  -> (_) { 11 },
+                           Quux: -> (_) { 12 } }
+        expect(f[foo.Foo]   ).to eq(1)
+        expect(g[bar.Qux 99]).to eq(7)
+        expect(h[baz.Quux]  ).to eq(12)
+        expect { f[bar.Foo] }.to \
+          raise_exception(ArgumentError, /constructors do not match/)
+        expect { g[baz.Foo] }.to \
+          raise_exception(ArgumentError, /constructors do not match/)
+        expect { h[foo.Foo] }.to \
+          raise_exception(ArgumentError, /constructors do not match/)
+        expect { h[bar.Foo] }.to \
+          raise_exception(ArgumentError, /constructors do not match/)
+      end
     end
   end
 
