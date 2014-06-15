@@ -2,7 +2,7 @@
 #
 # File        : obfusk/list.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-14
+# Date        : 2014-06-15
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -14,6 +14,7 @@ require 'obfusk/lazy'
 require 'obfusk/monad'
 
 module Obfusk
+  # Lazy List
   class List
     include ADT
     include Monad
@@ -29,92 +30,75 @@ module Obfusk
                                      ::Obfusk.lazy(data[:tail]) }
     end
 
+    class Cons
+      alias :lazy_tail :tail
+
+      # lazy tail
+      def tail
+        lazy_tail._
+      end
+    end
+
     def each(&b)
       return enum_for :each unless b
-      xs = self; while xs != Nil() do b[xs.head]; xs = xs.tail._ end
+      xs = self; while xs != Nil() do b[xs.head]; xs = xs.tail end
+    end
+
+    def to_s
+      n = self.class.name
+      self == Nil() ? "<##{n}>" : "<##{n}(#{head},...)>"
     end
 
     def to_a
       each.to_a
     end
 
+    # pretend to be lazy (so we don't need Obfusk.eager)
     def _
       self
     end
 
-    # --
-
-    def filter(p = nil, &b)
-      g = f || b
-      match Nil:  -> (_) { Nil() },
-            Cons: -> (x) { p[x] ? Cons(x.head) { x.tail._.filter p  }
-                                :                x.tail._.filter(p) }
+    # pretend to be lazy (see _)
+    def chain(m,*a,&b)
+      ::Obfusk.lazy { public_send(m,*a,&b) }
     end
 
+    # --
+
+    # the list of those elements that satisfy the predicate
+    def filter(p = nil, &b)
+      g = p || b
+      match Nil:  -> (_)  { Nil() },
+            Cons: -> (xs) { g[xs] ? Cons(xs.head) { xs.tail.filter(g) }
+                                :                   xs.tail.filter(g) }
+    end
+
+    # the list obtained by applying a function (or block) to each element
     def map(f = nil, &b)
       g = f || b
-      match Nil:  -> (_) { Nil() },
-            Cons: -> (x) { Cons(g[x.head]) { x.tail._.map g } }
+      match Nil:  -> (_)  { Nil() },
+            Cons: -> (xs) { Cons(g[xs.head]) { xs.tail.map g } }
     end
 
     # --
 
+    # element at index
     def [](i)
       raise ArgumentError, 'negative index' if i < 0
       j = 0; each { |x| return x if i == j; j += 1 }
       raise ArgumentError, 'index too large'
     end
 
+    # length
     def length
       n = 0; each { n += 1 }; n
     end
 
+    # empty?
     def null
-      match Nil:  -> (_) { true }, Cons: -> (x) { false }
+      match Nil: -> (_) { true }, Cons: -> (_) { false }
     end
     alias :empty? :null
-
-    # --
-
-    def append(ys)
-      match Nil:  -> (_) { ys._ },
-            Cons: -> (x) { Cons(x.head) { x.tail._.append ys._ } }
-    end
-
-    # def reverse
-
-    # --
-
-    # def foldl
-
-    def foldr(z, f = nil, &b)
-      g = f || b
-      match Nil:  -> (_) { z },
-            Cons: -> (x) { g[x.head, ::Obfusk.lazy { x.tail._.foldr(z, g) }] }
-    end
-
-    # def and
-    # def or
-    # def any
-
-    # def concat
-    #   foldr(Nil()) { |x,y| x.append y[] } # TODO
-    # end
-
-    # def concatMap
-
-    # def sum
-    # def product
-    # def maximum
-    # def minimum
-
-    # --
-
-    # def zipWith(ys, f = nil, &b)
-    #   g = f || b
-    #   self == Nil() || ys._ == Nil() ? Nil() :
-    #     Cons(g[head, ys._.head]) { puts "!WTF" } # ; tail._.zipWith(ys._.tail, g) }
-    # end
 
     # --
 
@@ -123,9 +107,115 @@ module Obfusk
 
     # --
 
-    # ...
+    # append two lists
+    def append(ys)
+      match Nil:  -> (_)  { ys._ },
+            Cons: -> (xs) { Cons(xs.head) { xs.tail.append ys } }
+    end
 
-    # --
+    # def reverse
+
+    # -- Reducing lists (folds) --
+
+    # def foldl
+    # def foldl1
+
+    # foldr, applied to a binary operator, a starting value (typically
+    # the right-identity of the operator), and a list, reduces the
+    # list using the binary operator, from right to left:
+    #
+    # ```haskell
+    # foldr f z [x1, x2, ..., xn] == x1 `f` (x2 `f` ... (xn `f` z)...)
+    # ```
+    #
+    # NB: because ruby is not lazy, the secons argument of the binary
+    # operator is lazy and must be treated as such.
+    def foldr(z, f = nil, &b)
+      g = f || b
+      match Nil:  -> (_)  { z },
+            Cons: -> (xs) { g[xs.head, xs.tail.chain(:foldr, z, g)] }
+    end
+
+    # def foldr1
+
+    # -- Special folds --
+
+    # def and
+    # def or
+    # def any
+
+    # concatenate a list of lists
+    def concat
+      foldr(Nil()) { |x,ys| x.append ys }
+    end
+
+    # def concatMap
+
+    # def sum
+    # def product
+    # def maximum
+    # def minimum
+
+    # -- Building lists --
+
+    # def scanl
+    # def scanl1
+    # def scanr
+    # def scanr1
+
+    # -- Infinite lists --
+
+    # def iterate
+    # def repeat
+    # def replicate
+    # def cycle
+
+    # -- Sublists --
+
+    # the prefix of length n (or the list itself if n > length)
+    def take(n)
+      return Nil() if n <= 0
+      match Nil:  -> (_)  { Nil() },
+            Cons: -> (xs) { Cons(xs.head) { xs.tail.take(n - 1) } }
+    end
+
+    # def drop
+    # def splitAt
+    # def takeWhile
+    # def dropWhile
+    # def span
+    # def break
+
+    # -- Searching lists --
+
+    # def elem
+    # def notElem
+    # def lookup
+
+    # -- Zipping and unzipping lists --
+
+    # def zip
+    # def zip3
+
+    # combine parallel elements of two lists using a binary operator
+    def zipWith(ys, f = nil, &b)
+      g = f || b
+      self == Nil() || ys._ == Nil() ? Nil() :
+        Cons(g[head, ys._.head]) { tail.zipWith(ys._.tail, g) }
+    end
+
+    # def zipWith3
+    # def unzip
+    # def unzip3
+
+    # -- Functions on strings --
+
+    # def lines
+    # def words
+    # def unlines
+    # def unwords
+
+    # -- Monad --
 
     def self.mreturn(x)
       Cons x, Nil()
@@ -140,17 +230,12 @@ module Obfusk
 
   List.import_constructors self
 
-  def self.List(*xs)
-    xs.empty? ? Nil() : Cons(xs.first) { List(*xs.drop(1)) }
-  end
-
-  def self.cons(*xs, &b)
-    if xs.empty?
-      b[]
-    else
-      *ys, x = xs; zs = Cons(x, &b)
-      ys.reverse.each { |y| zs = Cons(y, zs) }; zs
-    end
+  # create a list from its items; pass a block to add a lazy tail
+  def self.List(*xs, &b)
+    b && xs.length == 1 ? Cons(xs.first, &b)  :
+    b && xs.empty?      ? b._                 :
+    xs.empty?           ? Nil()               :
+    Cons(xs.first) { List(*xs.drop(1), &b) }
   end
 end
 

@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monad.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-14
+# Date        : 2014-06-15
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+

@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monads.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-14
+# Date        : 2014-06-15
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -46,6 +46,9 @@ module Obfusk
               Right:  -> (x) { b[x.value] }
     end
   end
+
+  [Maybe, Either].each { |x| x.import_constructors self }
+
 end
 
 # vim: set tw=70 sw=2 sts=2 et fdm=marker :

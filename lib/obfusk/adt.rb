@@ -2,7 +2,7 @@
 #
 # File        : obfusk/adt.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-14
+# Date        : 2014-06-15
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -10,6 +10,8 @@
 # --                                                            ; }}}1
 
 module Obfusk
+
+  # Algebraic Data Type
   module ADT
     include Comparable
 
@@ -17,11 +19,16 @@ module Obfusk
       base.extend ClassMethods
     end
 
+    # use a contructor!
+    # @raise NoMethodError
     def initialize
       raise NoMethodError, 'use a contructor!'  # TODO
     end
 
     module ClassMethods
+      # create a constructor
+      # @param [Symbol]   name  the name of the constructor
+      # @param [<Symbol>] keys  the keys of the constructor
       def constructor(name, *keys, &b)
         self_ = self
         keys_ = keys.map(&:to_sym)
@@ -61,10 +68,12 @@ module Obfusk
       end
       private :constructor
 
+      # the constructors
       def constructors
         @constructors
       end
 
+      # import the constructors into another namespace
       def import_constructors(scope)
         constructors.each_pair do |k,v|
           m = method k
@@ -73,30 +82,36 @@ module Obfusk
         end
       end
 
-      def match(m, opts)
-        unless m.cls == self
-          raise ArgumentError, "types do not match (#{m.cls} for #{self})"
+      # pattern matching
+      def match(x, opts)
+        unless x.cls == self
+          raise ArgumentError, "types do not match (#{x.cls} for #{self})"
         end
-        m.match opts
+        x.match opts
       end
     end
 
+    # the data
     def _data
       @data
     end
 
+    # equal?
     def ==(rhs)
       cls == rhs.cls && ctor == rhs.ctor && _data == rhs._data
     end
 
+    # equal and of the same type?
     def eql?(rhs)
       self == rhs
     end
 
+    # ordering
     def <=>(rhs)
       cls == rhs.cls && ctor == rhs.ctor ? _data <=> rhs._data : nil
     end
 
+    # pattern matching
     def match(opts)
       unless (ck = cls.constructors.keys.sort) == (ok = opts.keys.sort)
         raise ArgumentError,
@@ -105,11 +120,13 @@ module Obfusk
       opts[ctor_name][self]
     end
 
+    # to string
     def to_s
       ctor_name = ctor.name.gsub(/^.*::/,'')
       "#<#{cls.name}.#{ctor_name}: #{@data}>"
     end
 
+    # to string
     def inspect
       to_s
     end
