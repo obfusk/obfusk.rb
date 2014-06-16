@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monads_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-16
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -45,6 +45,11 @@ describe 'obfusk/monads' do
       expect(l).to eq([:a,:b,:d])
       expect(m.return(1).pipeline(a,b,c,d)).to eq(m.Nothing)
       expect(l).to eq([:a,:b,:d,:a,:b,:c])
+    end
+    it 'pipelines w/ non-procs' do
+      expect(m.return(1).pipeline(
+        m.Just(2), -> x { m.return x * x }
+      )).to eq(m.Just(4))
     end
     it 'sequences' do
       expect(

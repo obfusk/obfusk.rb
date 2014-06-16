@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monad.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-16
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -71,7 +71,8 @@ module Obfusk
 
       # concatenate a sequence of binds
       def pipeline(m, *fs)
-        fs.empty? ? m : m.bind { |k| pipeline fs.first[k], *fs.drop(1) }
+        a = -> f, x { f.is_a?(Proc) ? f[x] : f }
+        fs.empty? ? m : m.bind { |x| pipeline a[fs.first,x], *fs.drop(1) }
       end
 
       # evaluate each action in the sequence from left to right, and
