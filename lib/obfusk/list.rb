@@ -2,7 +2,7 @@
 #
 # File        : obfusk/list.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-16
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -81,16 +81,16 @@ module Obfusk
     # the list of those elements that satisfy the predicate
     def filter(p = nil, &b)
       g = p || b
-      match Nil:  -> (_)  { Nil() },
-            Cons: -> (xs) { g[xs.head] ? Cons(xs.head) { xs.tail.filter(g) }
-                                       :                 xs.tail.filter(g) }
+      match Nil:  -> (_) { Nil() },
+            Cons: -> (_) { g[head] ? Cons(head) { tail.filter(g) }
+                                   :              tail.filter(g) }
     end
 
     # the list obtained by applying a function (or block) to each element
     def map(f = nil, &b)
       g = f || b
-      match Nil:  -> (_)  { Nil() },
-            Cons: -> (xs) { Cons(g[xs.head]) { xs.tail.map g } }
+      match Nil:  -> (_) { Nil() },
+            Cons: -> (_) { Cons(g[head]) { tail.map g } }
     end
 
     # --
@@ -123,8 +123,8 @@ module Obfusk
 
     # append two lists
     def append(ys)
-      match Nil:  -> (_)  { ys._ },
-            Cons: -> (xs) { Cons(xs.head) { xs.tail.append ys } }
+      match Nil:  -> (_) { ys._ },
+            Cons: -> (_) { Cons(head) { tail.append ys } }
     end
 
     # def reverse
@@ -146,8 +146,8 @@ module Obfusk
     # operator is lazy and must be treated as such.
     def foldr(z, f = nil, &b)
       g = f || b
-      match Nil:  -> (_)  { z },
-            Cons: -> (xs) { g[xs.head, xs.tail.chain(:foldr, z, g)] }
+      match Nil:  -> (_) { z },
+            Cons: -> (_) { g[head, tail.chain(:foldr, z, g)] }
     end
 
     # def foldr1
@@ -189,8 +189,8 @@ module Obfusk
     # the prefix of length n (or the list itself if n > length)
     def take(n)
       return Nil() if n <= 0
-      match Nil:  -> (_)  { Nil() },
-            Cons: -> (xs) { Cons(xs.head) { xs.tail.take(n - 1) } }
+      match Nil:  -> (_) { Nil() },
+            Cons: -> (_) { Cons(head) { tail.take(n - 1) } }
     end
 
     # def drop
@@ -238,7 +238,7 @@ module Obfusk
     # TODO
     # def self.bind_pass(m, &b)
     #   m.match Nil:  -> (_) { m },
-    #           Cons: -> (x) {}     # concat (map f m)
+    #           Cons: -> (_) {}     # concat (map f m)
     # end
   end
 
