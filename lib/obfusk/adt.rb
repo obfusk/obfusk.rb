@@ -2,7 +2,7 @@
 #
 # File        : obfusk/adt.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-16
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -17,6 +17,8 @@ module Obfusk
 
   # Algebraic Data Type
   module ADT
+    module Constructor; end
+
     include Comparable
 
     def self.included(base)
@@ -56,6 +58,7 @@ module Obfusk
           end
         end
         ctor.class_eval do
+          include ::Obfusk::ADT::Constructor
           attr_accessor :ctor, :ctor_name, :ctor_keys
           keys_.each { |k| define_method(k) { @data[k] } }
           define_method(:initialize) do |guard, ctor, *values, &f|
