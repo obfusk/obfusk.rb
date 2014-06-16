@@ -21,8 +21,8 @@ describe 'obfusk/monads' do
       expect(m.mreturn(42)).to eq(m.Just(42))
     end
     it 'bind_passes' do
-      expect(m.Nothing  .bind { |x| m.Just x + 1 }).to eq(m.Nothing)
-      expect(m.Just(42) .bind { |x| m.Just x + 1 }).to eq(m.Just(43))
+      expect(m.Nothing  .bind { |x|  m.Just x + 1 }).to eq(m.Nothing)
+      expect(m.Just(42) .bind -> x { m.Just x + 1 }).to eq(m.Just(43))
     end
     it 'bind_discards' do
       expect(m.Nothing  .bind(m.Just(99))).to eq(m.Nothing)

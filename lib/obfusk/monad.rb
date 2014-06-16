@@ -40,7 +40,8 @@ module Obfusk
       # bind m, k         # discard value
       # ```
       def bind(m, k = nil, &b)
-        b ? bind_pass(m, &b) : bind_discard(m, k)
+        b ? bind_pass(m, &b) : k.is_a?(::Proc) ? bind_pass(m, &k) :
+                                                 bind_discard(m, k)
       end
 
       # sequentially compose two actions, passing any value produced
@@ -71,7 +72,7 @@ module Obfusk
 
       # concatenate a sequence of binds
       def pipeline(m, *fs)
-        a = -> f, x { f.is_a?(Proc) ? f[x] : f }
+        a = -> f, x { f.is_a?(::Proc) ? f[x] : f }
         fs.empty? ? m : m.bind { |x| pipeline a[fs.first,x], *fs.drop(1) }
       end
 
