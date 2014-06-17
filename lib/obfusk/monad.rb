@@ -96,6 +96,10 @@ module Obfusk
         self.class.public_send m, self, *a, &b
       end
     end
+
+    def >>(k)
+      bind k
+    end
   end
 
   module MonadPlus
