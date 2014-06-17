@@ -2,7 +2,7 @@
 #
 # File        : obfusk/lazy_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-17
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -33,14 +33,14 @@ describe 'obfusk/lazy' do
         define_method(:foo)         { y += 1 }
       end
       l = Obfusk.lazy { c.new }
-      expect(x).to    eq(0)
-      expect(y).to    eq(0)
+      expect(x).to        eq(0)
+      expect(y).to        eq(0)
       l2 = l.chain(:foo)
-      expect(x).to    eq(0)
-      expect(y).to    eq(0)
-      expect(l2._).to eq(1)
-      expect(x).to    eq(1)
-      expect(y).to    eq(1)
+      expect(x).to        eq(0)
+      expect(y).to        eq(0)
+      expect(l2.deref).to eq(1)
+      expect(x).to        eq(1)
+      expect(y).to        eq(1)
     end
   end
 
