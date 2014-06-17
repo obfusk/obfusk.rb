@@ -44,13 +44,13 @@ describe 'obfusk/adt' do
       expect(foo.Foo        ).to be_a(foo)
     end
     it 'has constructors with the expected attrs' do
-      expect(foo.Foo.ctor_name        ).to eq(:Foo)
-      expect(foo.Bar(1,2).ctor_name   ).to eq(:Bar)
-      expect(foo.Baz.ctor_name        ).to eq(:Baz)
-      expect(foo.Bar(11,17).ctor_keys ).to eq([:x, :y])
-      expect(foo.Bar(1,2).x           ).to eq(1)
-      expect(foo.Bar(1,2).y           ).to eq(2)
-      expect(foo.Baz.z                ).to eq(42)
+      expect(foo.Foo.__adt_ctor_name__        ).to eq(:Foo)
+      expect(foo.Bar(1,2).__adt_ctor_name__   ).to eq(:Bar)
+      expect(foo.Baz.__adt_ctor_name__        ).to eq(:Baz)
+      expect(foo.Bar(11,17).__adt_ctor_keys__ ).to eq([:x, :y])
+      expect(foo.Bar(1,2).x                   ).to eq(1)
+      expect(foo.Bar(1,2).y                   ).to eq(2)
+      expect(foo.Baz.z                        ).to eq(42)
     end
     it 'has record constructors' do
       expect(foo.new :Foo).to             eq(foo.Foo)

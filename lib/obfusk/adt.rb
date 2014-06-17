@@ -70,8 +70,7 @@ module Obfusk
         end
         ctor.class_eval do
           include ::Obfusk::ADT::Constructor
-          attr_accessor :ctor, :ctor_name, :ctor_keys
-          keys_.each { |k| define_method(k) { data[k] } }
+          keys_.each { |k| define_method(k) { __adt_data__[k] } }
           define_method(:initialize) do |guard, ctor, *values, &f|
             raise ArgumentError, 'for internal use only!' \
               unless guard == :for_internal_use_only
@@ -130,11 +129,24 @@ module Obfusk
     # clone
     def clone(merge_data = {})
       merge_data.empty? ? self :
-        self.class.superclass.new(ctor_name, data.merge(merge_data))
+        self.class.superclass.new(__adt_ctor_name__,
+                                  __adt_data__.merge(merge_data))
+    end
+
+    def __adt_ctor__
+      @ctor
+    end
+
+    def __adt_ctor_name__
+      @ctor_name
+    end
+
+    def __adt_ctor_keys__
+      @ctor_keys
     end
 
     # the data
-    def data
+    def __adt_data__
       @data
     end
 
@@ -142,7 +154,7 @@ module Obfusk
     def ==(rhs)
       rhs.is_a?(::Obfusk::ADT) &&
         self.class.superclass == rhs.class.superclass &&
-        ctor == rhs.ctor && _eq_data(rhs)
+        __adt_ctor__ == rhs.__adt_ctor__ && _eq_data(rhs)
     end
 
     # equal and of the same type?
@@ -155,16 +167,18 @@ module Obfusk
       return nil unless rhs.is_a?(::Obfusk::ADT) &&
                         self.class.superclass == rhs.class.superclass
       k = self.class.superclass.constructors.keys
-      ctor != rhs.ctor ? k.index(ctor_name) <=> k.index(rhs.ctor_name) :
+      __adt_ctor__ != rhs.__adt_ctor__ ?
+        k.index(__adt_ctor_name__) <=> k.index(rhs.__adt_ctor_name__) :
         _compare_data(rhs)
     end
 
     def _eq_data(rhs)
-      data == rhs.data
+      __adt_data__ == rhs.__adt_data__
     end
 
     def _compare_data(rhs)
-      data.values_at(*ctor_keys) <=> rhs.data.values_at(*ctor_keys)
+      __adt_data__.values_at(*__adt_ctor_keys__) <=>
+        rhs.__adt_data__.values_at(*__adt_ctor_keys__)
     end
 
     # pattern matching
@@ -174,12 +188,13 @@ module Obfusk
         raise ArgumentError,
           "constructors do not match (#{ok} for #{ck})"
       end
-      opts[ctor_name][self]
+      opts[__adt_ctor_name__][self]
     end
 
     # to string
     def to_s
-      "#<#{self.class.superclass.name || '#ADT'}.#{ctor_name}: #{data}>"
+      n = self.class.superclass.name || '#ADT'
+      "#<#{n}.#{__adt_ctor_name__}: #{__adt_data__}>"
     end
 
     # to string

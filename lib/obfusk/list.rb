@@ -25,7 +25,7 @@ module Obfusk
       # count block as extra value; count nil tail as missing one
       v = values.length + (f ? 1 : 0) -
           (values.length > 1 && !data[:tail] ? 1 : 0)
-      if (k = cls.ctor_keys.length) != v
+      if (k = cls.__adt_ctor_keys__.length) != v
         raise ArgumentError, "wrong number of arguments (#{v} for #{k})"
       end
       { head: data[:head], tail: f ? ::Obfusk.lazy(&f) :
