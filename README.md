@@ -2,7 +2,7 @@
 
     File        : README.md
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2014-06-16
+    Date        : 2014-06-17
 
     Copyright   : Copyright (C) 2014  Felix C. Stegerman
     Version     : v0.1.1
@@ -27,10 +27,14 @@ class Foo
   constructor :Baz, :value
 end
 
-x = Foo.Bar()
+x = Foo.Bar
 y = Foo.Baz 99
 
-puts y.value # => 99
+y.value # => 99
+
+x.match Bar: -> (_) { "it's a bar!" },
+        Baz: -> (z) { "it's a baz with value: #{z.value}" }
+# => "it's a bar!"
 ```
 
 ```ruby
