@@ -109,11 +109,11 @@ module Obfusk
       end
 
       # import the constructors into another namespace
-      def import_constructors(scope)
+      def import_constructors(scope, const = true)
         constructors.each_pair do |k,v|
           m = method k
           scope.define_singleton_method(k) { |*a,&b| m[*a,&b] }
-          scope.const_set k, v[:ctor]
+          scope.const_set k, v[:ctor] if const
         end
       end
 

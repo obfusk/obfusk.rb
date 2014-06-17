@@ -96,15 +96,16 @@ Foo.new('...').pipeline f, g
 
 ```ruby
 require 'obfusk/monads'
+ms = Obfusk::Monads
 
-x = Obfusk.Nothing
-y = Obfusk.Just 42
+x = ms.Nothing
+y = ms.Just 42
 
 x.bind(y)
-# => Obfusk.Nothing
+# => ms.Nothing
 
-Obfusk.Left "oops"
-Obfusk.Right 37
+ms.Left "oops"
+ms.Right 37
 ```
 
 ...

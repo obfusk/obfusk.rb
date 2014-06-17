@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monads_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-16
+# Date        : 2014-06-17
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -11,10 +11,22 @@
 
 require 'obfusk/monads'
 
-m = Obfusk::Maybe
-e = Obfusk::Either
+m = Obfusk::Monads::Maybe
+e = Obfusk::Monads::Either
+i = Obfusk::Monads::Identity
+s = Obfusk::Monads::State
 
 describe 'obfusk/monads' do
+
+  context 'Identity' do
+    it 'works' do
+      x = i.Identity 11
+      y = i.Identity 22
+      expect(x.run).to                                eq(11)
+      expect((x >> y).run).to                         eq(22)
+      expect((x >> -> n { i.mreturn n - 1 }).run).to  eq(10)
+    end
+  end
 
   context 'Maybe' do
     it 'returns' do
@@ -92,6 +104,17 @@ describe 'obfusk/monads' do
     end
     it 'joins' do
       expect(e.mreturn(e.mreturn(42)).join).to eq(e.Right(42))
+    end
+  end
+
+  context 'State' do
+    it 'works' do
+      expect(s.eval(s.get, 99)).to                            eq(99)
+      expect(s.eval(s.put(1) >> s.get, 99)).to                eq(1)
+      expect(s.exec(s.modify { |x| x + 1 }, 99)).to           eq(100)
+      expect(s.eval(s.modify { |x| x - 1 } >> s.get, 43)).to  eq(42)
+      expect(s.eval(s.with(s.get) { |x| x - 1 }, 38)).to      eq(37)
+      expect(s.eval(s.gets { |x| x.first }, [1,2,3])).to      eq(1)
     end
   end
 
