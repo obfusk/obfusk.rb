@@ -2,7 +2,7 @@
 #
 # File        : obfusk/list.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-16
+# Date        : 2014-06-17
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -22,7 +22,9 @@ module Obfusk
 
     constructor :Nil
     constructor(:Cons, :head, :tail) do |cls, data, values, f|
-      v = values.length + (f ? 1 : 0)
+      # count block as extra value; count nil tail as missing one
+      v = values.length + (f ? 1 : 0) -
+          (values.length > 1 && !data[:tail] ? 1 : 0)
       if (k = cls.ctor_keys.length) != v
         raise ArgumentError, "wrong number of arguments (#{v} for #{k})"
       end

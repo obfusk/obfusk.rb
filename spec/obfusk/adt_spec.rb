@@ -2,7 +2,7 @@
 #
 # File        : obfusk/adt_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-17
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -51,6 +51,16 @@ describe 'obfusk/adt' do
       expect(foo.Bar(1,2).x           ).to eq(1)
       expect(foo.Bar(1,2).y           ).to eq(2)
       expect(foo.Baz.z                ).to eq(42)
+    end
+    it 'has record constructors' do
+      expect(foo.new :Foo).to             eq(foo.Foo)
+      expect(foo.new :Bar, y: 1, x: 2).to eq(foo.Bar 2, 1)
+      expect(foo.new :Baz, z: 99).to      eq(foo.Baz 99)
+    end
+    it 'clones' do
+      x = foo.Bar(1,2)
+      expect(x.clone).to        be(x)
+      expect(x.clone(y: 99)).to eq(foo.Bar(1,99))
     end
     it 'handles singletons correctly' do
       expect(foo.Foo.object_id == foo.Foo.object_id).to be true

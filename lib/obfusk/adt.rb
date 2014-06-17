@@ -2,7 +2,7 @@
 #
 # File        : obfusk/adt.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-16
+# Date        : 2014-06-17
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -32,13 +32,24 @@ module Obfusk
     end
 
     module ClassMethods
+      # record constructor; call with name of constructor and hash of
+      # keys to values
+      def new(*a, &b)
+        ancestors.include?(::Obfusk::ADT::Constructor) ? super : _new(*a, &b)
+      end
+
+      def _new(ctor, data = {}, &b)
+        c = constructors[ctor]
+        c[:method].call *data.values_at(*c[:keys]), &b
+      end
+
       # duplicate constructors for subclasses
       def inherited(subclass)
         return if ::Obfusk::ADT_Meta__[:inheriting].last
         ctors = constructors
         subclass.class_eval do
           ctors.each_pair do |k,v|
-            constructor v[:ctor_name], *v[:ctor_keys], &v[:ctor_block]
+            constructor v[:name], *v[:keys], &v[:block]
           end
         end
       end
@@ -60,16 +71,16 @@ module Obfusk
         ctor.class_eval do
           include ::Obfusk::ADT::Constructor
           attr_accessor :ctor, :ctor_name, :ctor_keys
-          keys_.each { |k| define_method(k) { @data[k] } }
+          keys_.each { |k| define_method(k) { data[k] } }
           define_method(:initialize) do |guard, ctor, *values, &f|
             raise ArgumentError, 'for internal use only!' \
               unless guard == :for_internal_use_only
             if !b && (k = keys_.length) != (v = values.length)
               raise ArgumentError, "wrong number of arguments (#{v} for #{k})"
             end
-            data  = Hash[keys_.zip values]
+            data  = Hash[keys_.zip values].freeze
             @ctor = ctor ; @ctor_name = name_ ; @ctor_keys = keys_
-            @data = b ? b[self, data, values, f] : data
+            @data = b ? b[self, data, values, f].freeze : data
           end
         end
         class_eval do
@@ -84,8 +95,8 @@ module Obfusk
             define_method(name_)           { |*values,&b| f[values,b] }
           end
           constructors[name_] = {
-            ctor: ctor, method: method(name_),
-            ctor_name: name_, ctor_keys: keys_, ctor_block: b
+            ctor: ctor, method: method(name_), name: name_,
+            keys: keys_, block: b
           }
         end
         name_
@@ -116,8 +127,14 @@ module Obfusk
       end
     end
 
+    # clone
+    def clone(merge_data = {})
+      merge_data.empty? ? self :
+        self.class.superclass.new(ctor_name, data.merge(merge_data))
+    end
+
     # the data
-    def _data
+    def data
       @data
     end
 
@@ -143,11 +160,11 @@ module Obfusk
     end
 
     def _eq_data(rhs)
-      _data == rhs._data
+      data == rhs.data
     end
 
     def _compare_data(rhs)
-      _data.values_at(*ctor_keys) <=> rhs._data.values_at(*ctor_keys)
+      data.values_at(*ctor_keys) <=> rhs.data.values_at(*ctor_keys)
     end
 
     # pattern matching
@@ -162,7 +179,7 @@ module Obfusk
 
     # to string
     def to_s
-      "#<#{self.class.superclass.name || '#ADT'}.#{ctor_name}: #{@data}>"
+      "#<#{self.class.superclass.name || '#ADT'}.#{ctor_name}: #{data}>"
     end
 
     # to string
