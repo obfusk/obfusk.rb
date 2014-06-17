@@ -34,6 +34,15 @@ puts y.value # => 99
 ```
 
 ```ruby
+require 'obfusk/atom'
+
+x = Obfusk.atom 42
+x._ # => 42
+10.times { x.swap! { |v| v + 1 } }
+x._ # => 53
+```
+
+```ruby
 require 'obfusk/lazy'
 
 x = Obfusk.lazy { some_expensive_computation_that_returns_42 }
