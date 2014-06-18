@@ -2,7 +2,7 @@
 #
 # File        : obfusk/list_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-15
+# Date        : 2014-06-18
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -28,6 +28,12 @@ describe 'obfusk/list' do
       expect(l1.head).to eq(1)
       expect(l1.lazy_tail).to be_a(Proc)
       expect(l1.tail).to eq(Obfusk.Nil)
+    end
+    it 'compares' do
+      expect(Obfusk.List()).to      be < Obfusk.List(1)
+      expect(Obfusk.List(1,2,3)).to be < Obfusk.List(1,2,4)
+      expect(Obfusk.List(1,2,3)).to be > Obfusk.List(1,2,2)
+      expect(Obfusk.List(1,2,3)).to be > Obfusk.List(1,2)
     end
     it 'iterates' do
       x = 0; l2.each { |y| x += y }; expect(x).to eq(10)

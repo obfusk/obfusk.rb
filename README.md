@@ -159,6 +159,7 @@ ms.Right 37
 
 ```bash
 $ rake spec
+$ rake coverage
 $ rake docs
 ```
 

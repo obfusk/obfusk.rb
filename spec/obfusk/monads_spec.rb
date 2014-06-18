@@ -2,7 +2,7 @@
 #
 # File        : obfusk/monads_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-17
+# Date        : 2014-06-18
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -109,6 +109,8 @@ describe 'obfusk/monads' do
 
   context 'State' do
     it 'works' do
+      expect(s.return(42).eval(99)).to                        eq(42)
+      expect(s.return(42).exec(99)).to                        eq(99)
       expect(s.eval(s.get, 99)).to                            eq(99)
       expect(s.eval(s.put(1) >> s.get, 99)).to                eq(1)
       expect(s.exec(s.modify { |x| x + 1 }, 99)).to           eq(100)
