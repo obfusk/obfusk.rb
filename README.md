@@ -16,6 +16,7 @@
   obfusk.rb - functional programming library for ruby
 
 ## Examples
+
 []: {{{1
 
 ```ruby
@@ -37,6 +38,10 @@ x.match Bar: -> (_) { "it's a bar!" },
 # => "it's a bar!"
 ```
 
+[]: }}}1
+
+[]: {{{1
+
 ```ruby
 require 'obfusk/atom'
 
@@ -45,6 +50,32 @@ x._ # => 42
 10.times { x.swap! { |v| v + 1 } }
 x._ # => 53
 ```
+
+[]: }}}1
+
+[]: {{{1
+
+```ruby
+require 'obfusk/data'
+
+Obfusk.merge([1,2,3], 1 => 99)
+# => [1,99,3]
+
+x = { x: { y: 0 }, z: [1,2,3] }
+
+Obfusk.get_in x, :x, :y
+# => 0
+
+Obfusk.modify_in(x, :x, :y) { |v| v + 1 }
+# => { x: { y: 1 }, z: [1,2,3] }
+
+Obfusk.set_in(x, :z, 1, 99)
+# => { x: { y: 0 }, z: [1,99,3] }
+```
+
+[]: }}}1
+
+[]: {{{1
 
 ```ruby
 require 'obfusk/lazy'
@@ -60,6 +91,10 @@ z._ # => 42 (.new and .value not run until now)
 Obfusk.eager(lazy_or_not) # => value
 ```
 
+[]: }}}1
+
+[]: {{{1
+
 ```ruby
 require 'obfusk/list'
 
@@ -74,6 +109,10 @@ fibs.take(10).to_a
 fibs.map { |x| x*x } .take(10).to_a
 # => [0, 1, 1, 4, 9, 25, 64, 169, 441, 1156]
 ```
+
+[]: }}}1
+
+[]: {{{1
 
 ```ruby
 require 'obfusk/monad'
@@ -94,6 +133,10 @@ g = -> y { '...' }
 Foo.new('...').pipeline f, g
 ```
 
+[]: }}}1
+
+[]: {{{1
+
 ```ruby
 require 'obfusk/monads'
 ms = Obfusk::Monads
@@ -108,9 +151,9 @@ ms.Left "oops"
 ms.Right 37
 ```
 
-...
-
 []: }}}1
+
+...
 
 ## Specs & Docs
 
