@@ -2,12 +2,14 @@
 #
 # File        : obfusk/lazy.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-17
+# Date        : 2014-06-18
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
 #
 # --                                                            ; }}}1
+
+nil
 
 module Obfusk
   # lazy evaluation (thunk)

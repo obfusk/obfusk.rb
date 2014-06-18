@@ -1,5 +1,6 @@
 require 'obfusk/adt'
 require 'obfusk/atom'
+require 'obfusk/data'
 require 'obfusk/lazy'
 require 'obfusk/list'
 require 'obfusk/monad'
