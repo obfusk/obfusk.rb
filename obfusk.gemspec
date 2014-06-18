@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'simplecov', '~> 0.7.1'
+  s.add_development_dependency 'simplecov', '~> 0.7'  # TODO
   s.add_development_dependency 'yard'
 
   s.required_ruby_version = '>= 1.9.1'
