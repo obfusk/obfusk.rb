@@ -47,11 +47,11 @@ describe 'obfusk/data' do
     end
   end
 
-  context 'indifferent_hash' do
-    it 'is indifferent' do
-      x = o.indifferent_hash x: 99, 'y' => 88, 123 => 77
+  context 'symbolic_hash' do
+    it 'is symbolic' do
+      x = o.symbolic_hash x: 99, 'y' => 88, 123 => 77
       expect(x[:x ]).to eq(99)
-      expect(x['x']).to eq(99)
+      expect(x['x']).to eq(nil)
       expect(x[:y ]).to eq(88)
       expect(x['y']).to eq(88)
       expect(x[:z ]).to eq(nil)
@@ -61,12 +61,12 @@ describe 'obfusk/data' do
     end
   end
 
-  context 'indifferent_nested_hashes' do
-    it 'is nestedly indifferent' do
-      x = o.indifferent_nested_hashes [1, { x: [2, { 'y' => 42 }] } ]
+  context 'symbolic_nested_hashes' do
+    it 'is nestedly symbolic' do
+      x = o.symbolic_nested_hashes [1, { x: [2, { 'y' => 42 }] } ]
       expect(x[1][:x ]).to          eq([2, { 'y' => 42 }])
-      expect(x[1]['x']).to          eq([2, { 'y' => 42 }])
-      expect(x[1]['x'][1][:y ]).to  eq(42)
+      expect(x[1]['x']).to          eq(nil)
+      expect(x[1][:x ][1][:y ]).to  eq(42)
       expect(x[1][:x ][1]['y']).to  eq(42)
     end
   end

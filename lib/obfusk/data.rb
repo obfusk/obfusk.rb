@@ -36,23 +36,18 @@ module Obfusk
     x.respond_to?(:__obfusk_merge__!) ? x.__obfusk_merge__!(h) : x.merge!(h)
   end
 
-  # hash w/ indifferent access (i.e. symbol or string does not matter)
-  def self.indifferent_hash(h = {}, &b)
-    x = Hash.new do |h,k|
-      case k
-      when Symbol ; h.fetch k.to_s  , nil
-      when String ; h.fetch k.to_sym, nil
-      else          nil
-      end
-    end
+  # hash w/ symbolic access: hash[:symbol] will return hash['symbol']
+  # if the key :symbol is not found
+  def self.symbolic_hash(h = {}, &b)
+    x = Hash.new { |h,k| h[k.to_s] if Symbol === k }
     h.each { |k,v| x[k] = b ? b[v] : v }; x
   end
 
-  # indifferent nested hashes/arrays/...
-  def self.indifferent_nested_hashes(x)
+  # symbolic nested hashes/arrays/...
+  def self.symbolic_nested_hashes(x)
     case x
-    when Hash ; indifferent_hash(x) { |v| indifferent_nested_hashes v }
-    when Array; x.map { |v| indifferent_nested_hashes v }
+    when Hash ; symbolic_hash(x) { |v| symbolic_nested_hashes v }
+    when Array; x.map { |v| symbolic_nested_hashes v }
     else        x
     end
   end
