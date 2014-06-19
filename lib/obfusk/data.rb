@@ -2,7 +2,7 @@
 #
 # File        : obfusk/data.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-18
+# Date        : 2014-06-19
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -34,6 +34,27 @@ module Obfusk
   # merge anything that responds to `.__obfusk_merge__!` or `.merge!`
   def self.merge!(x, h = {})
     x.respond_to?(:__obfusk_merge__!) ? x.__obfusk_merge__!(h) : x.merge!(h)
+  end
+
+  # hash w/ indifferent access (i.e. symbol or string does not matter)
+  def self.indifferent_hash(h = {}, &b)
+    x = Hash.new do |h,k|
+      case k
+      when Symbol ; h.fetch k.to_s  , nil
+      when String ; h.fetch k.to_sym, nil
+      else          nil
+      end
+    end
+    h.each { |k,v| x[k] = b ? b[v] : v }; x
+  end
+
+  # indifferent nested hashes/arrays/...
+  def self.indifferent_nested_hashes(x)
+    case x
+    when Hash ; indifferent_hash(x) { |v| indifferent_nested_hashes v }
+    when Array; x.map { |v| indifferent_nested_hashes v }
+    else        x
+    end
   end
 
   # -- nested data structures --

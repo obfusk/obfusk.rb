@@ -2,7 +2,7 @@
 #
 # File        : obfusk/data_spec.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-18
+# Date        : 2014-06-19
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -44,6 +44,30 @@ describe 'obfusk/data' do
       expect(o.merge!(a2,1 => 88)).to eq([1,88,3])
       expect(a1).to                   eq([1,2,3,99])
       expect(a2).to                   eq([1,88,3])
+    end
+  end
+
+  context 'indifferent_hash' do
+    it 'is indifferent' do
+      x = o.indifferent_hash x: 99, 'y' => 88, 123 => 77
+      expect(x[:x ]).to eq(99)
+      expect(x['x']).to eq(99)
+      expect(x[:y ]).to eq(88)
+      expect(x['y']).to eq(88)
+      expect(x[:z ]).to eq(nil)
+      expect(x['z']).to eq(nil)
+      expect(x[123]).to eq(77)
+      expect(x[456]).to eq(nil)
+    end
+  end
+
+  context 'indifferent_nested_hashes' do
+    it 'is nestedly indifferent' do
+      x = o.indifferent_nested_hashes [1, { x: [2, { 'y' => 42 }] } ]
+      expect(x[1][:x ]).to          eq([2, { 'y' => 42 }])
+      expect(x[1]['x']).to          eq([2, { 'y' => 42 }])
+      expect(x[1]['x'][1][:y ]).to  eq(42)
+      expect(x[1][:x ][1]['y']).to  eq(42)
     end
   end
 
