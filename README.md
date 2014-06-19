@@ -2,7 +2,7 @@
 
     File        : README.md
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2014-06-18
+    Date        : 2014-06-19
 
     Copyright   : Copyright (C) 2014  Felix C. Stegerman
     Version     : v0.1.3
@@ -166,8 +166,13 @@ $ rake docs
 ## TODO
 
   * more lists operations
-  * more stuff from obfusk.coffee
   * ...
+
+<!--
+https://clojure.github.io/clojure/#clojure.core
+http://hackage.haskell.org/package/base-4.7.0.0/docs/Prelude.html
+http://obfusk.org/obfusk.coffee
+-->
 
 ## License
 
