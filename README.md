@@ -2,7 +2,7 @@
 
     File        : README.md
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2014-06-19
+    Date        : 2014-11-23
 
     Copyright   : Copyright (C) 2014  Felix C. Stegerman
     Version     : v0.1.3
@@ -10,6 +10,7 @@
 []: }}}1
 
 [![Gem Version](https://badge.fury.io/rb/obfusk.png)](https://badge.fury.io/rb/obfusk)
+[![Build Status](https://travis-ci.org/obfusk/obfusk.rb.png)](https://travis-ci.org/obfusk/obfusk.rb)
 
 ## Description
 

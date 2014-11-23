@@ -46,7 +46,7 @@ end
 
 desc 'Cleanup'
 task :clean do
-  sh 'rm -rf .yardoc/ coverage/ doc/ *.gem'
+  sh 'rm -rf .yardoc/ coverage/ doc/ *.gem Gemfile.lock'
 end
 
 desc 'Build SNAPSHOT gem'
