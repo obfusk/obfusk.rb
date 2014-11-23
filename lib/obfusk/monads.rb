@@ -40,15 +40,15 @@ module Obfusk
         Just(x)
       end
       def self.bind_pass(m, &b)
-        m.match Nothing:  -> (_) { Nothing()  },
-                Just:     -> (x) { b[x.value] }
+        m.match Nothing:  ->(_) { Nothing()  },
+                Just:     ->(x) { b[x.value] }
       end
       def self.zero
         Nothing()
       end
       def self.lazy_plus(m, k)
-        m.match Nothing:  -> (_) { k._ },
-                Just:     -> (_) { m   }
+        m.match Nothing:  ->(_) { k._ },
+                Just:     ->(_) { m   }
       end
     end
 
@@ -63,8 +63,8 @@ module Obfusk
         Right(x)
       end
       def self.bind_pass(m, &b)
-        m.match Left:   -> (_) { m },
-                Right:  -> (x) { b[x.value] }
+        m.match Left:   ->(_) { m },
+                Right:  ->(x) { b[x.value] }
       end
     end
 

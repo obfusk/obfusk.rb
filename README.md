@@ -34,8 +34,8 @@ y = Foo.Baz 99
 
 y.value # => 99
 
-x.match Bar: -> (_) { "it's a bar!" },
-        Baz: -> (z) { "it's a baz with value: #{z.value}" }
+x.match Bar: ->(_) { "it's a bar!" },
+        Baz: ->(z) { "it's a baz with value: #{z.value}" }
 # => "it's a bar!"
 ```
 

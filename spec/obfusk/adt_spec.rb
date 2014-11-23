@@ -66,15 +66,15 @@ describe 'obfusk/adt' do
       expect(foo.Foo.object_id == foo.Foo.object_id).to be true
     end
     it 'pattern-matches' do
-      f = -> x { x.match Foo: -> (_) { 1 },
-                         Bar: -> (x) { x.x + x.y },
-                         Baz: -> (x) { -x.z } }
+      f = -> x { x.match Foo: ->(_) { 1 },
+                         Bar: ->(x) { x.x + x.y },
+                         Baz: ->(x) { -x.z } }
       expect(f[foo.Foo      ]).to eq(1)
       expect(f[foo.Bar(99,1)]).to eq(100)
       expect(f[foo.Baz(77)  ]).to eq(-77)
     end
     it 'fails matching with wrong keys' do
-      expect{ foo.Foo.match(Foo: -> (_) { 99 }) }.to \
+      expect{ foo.Foo.match(Foo: ->(_) { 99 }) }.to \
         raise_exception(ArgumentError, /constructors do not match/)
       expect{ foo.Foo.match(Foo: nil, Bar: nil, Baz: nil, Qux: nil) }.to \
         raise_exception(ArgumentError, /constructors do not match/)
@@ -108,18 +108,18 @@ describe 'obfusk/adt' do
         expect(baz.constructors.keys).to eq([:Foo,:Bar,:Baz,:Qux,:Quux])
       end
       it 'matches properly' do
-        f = -> x { x.match Foo:  -> (_) { 1  },
-                           Bar:  -> (_) { 2  },
-                           Baz:  -> (_) { 3  } }
-        g = -> x { x.match Foo:  -> (_) { 4  },
-                           Bar:  -> (_) { 5  },
-                           Baz:  -> (_) { 6  },
-                           Qux:  -> (_) { 7  } }
-        h = -> x { x.match Foo:  -> (_) { 8  },
-                           Bar:  -> (_) { 9  },
-                           Baz:  -> (_) { 10 },
-                           Qux:  -> (_) { 11 },
-                           Quux: -> (_) { 12 } }
+        f = -> x { x.match Foo:  ->(_) { 1  },
+                           Bar:  ->(_) { 2  },
+                           Baz:  ->(_) { 3  } }
+        g = -> x { x.match Foo:  ->(_) { 4  },
+                           Bar:  ->(_) { 5  },
+                           Baz:  ->(_) { 6  },
+                           Qux:  ->(_) { 7  } }
+        h = -> x { x.match Foo:  ->(_) { 8  },
+                           Bar:  ->(_) { 9  },
+                           Baz:  ->(_) { 10 },
+                           Qux:  ->(_) { 11 },
+                           Quux: ->(_) { 12 } }
         expect(f[foo.Foo]   ).to eq(1)
         expect(g[bar.Qux 99]).to eq(7)
         expect(h[baz.Quux]  ).to eq(12)

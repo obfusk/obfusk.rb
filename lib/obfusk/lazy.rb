@@ -16,7 +16,7 @@ module Obfusk
   def self.lazy(x = nil, &b)
     return x if lazy? x
     f = b ? b : -> { x }; v = nil; e = false
-    g = -> () { unless e then v = f[]; e = true end; v }
+    g = ->() { unless e then v = f[]; e = true end; v }
     g.define_singleton_method(:__obfusk_lazy__?) { true }
     g.define_singleton_method(:_)     { g[] }
     g.define_singleton_method(:deref) { g[] }
