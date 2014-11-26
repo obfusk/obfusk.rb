@@ -2,7 +2,7 @@
 #
 # File        : obfusk/adt.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-06-17
+# Date        : 2014-11-27
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : LGPLv3+
@@ -90,8 +90,9 @@ module Obfusk
             define_singleton_method(name_) { singleton }
             define_method(name_)           { singleton }
           else
-            define_singleton_method(name_) { |*values,&b| f[values,b] }
-            define_method(name_)           { |*values,&b| f[values,b] }
+            # FIXME: rbx-2.3.0 leaks &b scope; use &b_ here for now
+            define_singleton_method(name_) { |*values,&b_| f[values,b_] }
+            define_method(name_)           { |*values,&b_| f[values,b_] }
           end
           constructors[name_] = {
             ctor: ctor, method: method(name_), name: name_,

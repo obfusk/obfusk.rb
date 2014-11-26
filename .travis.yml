@@ -9,6 +9,6 @@ rvm:
 - 2.1.4
 - 2.1.5
 - ruby-head
-# - rbx-2
+- rbx-2
 - jruby
 script: bundle exec rake spec:verbose
